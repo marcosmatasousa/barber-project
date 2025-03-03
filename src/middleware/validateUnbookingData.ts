@@ -1,10 +1,10 @@
 import prisma from "../lib/prisma";
 import { AuthRequest } from "../types/authRequest";
 import { NextFunction, Response } from "express";
-import { deletePathParams } from "../types/booking";
+import { DeletePathParams } from "../types/booking";
 
 export async function validateUnbookingData(
-  req: AuthRequest<deletePathParams>,
+  req: AuthRequest<DeletePathParams>,
   res: Response,
   next: NextFunction
 ) {
