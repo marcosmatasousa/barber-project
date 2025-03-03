@@ -1,13 +1,15 @@
 import express, { NextFunction } from "express";
-import { Request, Response } from "express";
+import { Response } from "express";
 import { convertToTimestamp } from "../utils/utils";
 import prisma from "../lib/prisma";
 import { validateToken } from "../middleware/validateToken";
 import { AuthRequest } from "../types/authRequest";
-import { BookingBody } from "../types/booking";
+import { BookingBody, deletePathParams } from "../types/booking";
 import { validateBookingData } from "../middleware/validateBookingData";
+import { validateUnbookingData } from "../middleware/validateUnbookingData";
 import { validationResult } from "express-validator";
 import { bookingValidador } from "../validators/bookingValidator";
+import { unbookingValidator } from "../validators/unbookingValidator";
 
 const booking = express();
 
@@ -34,11 +36,6 @@ booking.post(
     const timestamp = convertToTimestamp(req.body);
     const { clientId, barberId, serviceId } = req.body;
 
-    if (clientId !== req.payload?.id && req.payload?.role !== "admin") {
-      res.status(401).json({ error: "Unauthorized" });
-      return;
-    }
-
     try {
       const appointment = await prisma.appointments.create({
         data: {
@@ -48,6 +45,7 @@ booking.post(
           serviceId: serviceId,
         },
       });
+
       res.status(201).json(appointment);
       return;
     } catch (error) {
@@ -59,9 +57,29 @@ booking.post(
 );
 
 booking.delete(
-  "/appointment/delete/:id",
+  "/booking/:appointmentId",
+  unbookingValidator,
+  validate,
   validateToken,
-  (req: Request, res: Response) => {}
+  validateUnbookingData,
+  async (req: AuthRequest<deletePathParams>, res: Response) => {
+    const { appointmentId } = req.params;
+
+    try {
+      await prisma.appointments.delete({
+        where: {
+          id: parseInt(appointmentId),
+        },
+      });
+
+      res.sendStatus(204);
+      return;
+    } catch (error) {
+      console.log(error);
+      res.sendStatus(500);
+      return;
+    }
+  }
 );
 
 export default booking;

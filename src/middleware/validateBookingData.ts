@@ -39,6 +39,12 @@ export async function validateBookingData(
       res.status(400).json({ error: "Service not found" });
       return;
     }
+
+    if (clientId !== req.payload?.id && req.payload?.role !== "admin") {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
+    
     next();
   } catch (error) {
     console.log(error);

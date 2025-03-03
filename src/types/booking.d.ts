@@ -12,3 +12,7 @@ export interface BookingBody {
   serviceId: number;
   payload?: JwtPayload;
 }
+
+export interface deletePathParams {
+  appointmentId: string;
+}
