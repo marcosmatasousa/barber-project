@@ -1,0 +1,13 @@
+POST http://localhost:3000/booking
+content-type: application/json
+authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImFkbWluIiwiaWQiOjEsInJvbGUiOiJhZG1pbiIsImlhdCI6MTc0MDc1MTIzOX0.i0iFLiXR6fSYm_KxiaF0QN6ty8hwF9WMBaCpS_1EHaw
+
+{
+    "day": 27,
+    "year": 2025,
+    "month": 4,
+    "hour": 13,
+    "minutes": 0,
+    "barberId": 1,
+    "clientId": 2
+}
