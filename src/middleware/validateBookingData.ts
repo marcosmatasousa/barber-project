@@ -2,12 +2,19 @@ import prisma from "../lib/prisma";
 import { AuthRequest } from "../types/authRequest";
 import { BookingBody } from "../types/booking";
 import { NextFunction, Response } from "express";
+import { isValidDate } from "../utils/utils";
 
 export async function validateBookingData(
   req: AuthRequest<{}, {}, BookingBody>,
   res: Response,
   next: NextFunction
 ) {
+  const { year, month, day } = req.body;
+  if (!isValidDate(year, month, day)) {
+    res.status(400).json({ error: "Invalid date" });
+    return;
+  }
+
   const { clientId, barberId, serviceId } = req.body;
   try {
     const clientExists = await prisma.users.findUnique({
@@ -44,7 +51,6 @@ export async function validateBookingData(
       res.status(401).json({ error: "Unauthorized" });
       return;
     }
-    
     next();
   } catch (error) {
     console.log(error);

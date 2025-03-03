@@ -2,7 +2,6 @@ import { verify } from "../lib/jwt";
 import { Response, NextFunction } from "express";
 import { JwtPayload } from "jsonwebtoken";
 import { AuthRequest } from "../types/authRequest";
-import { Auth } from "../types/auth";
 
 export function validateToken(
   req: AuthRequest,

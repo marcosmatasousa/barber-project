@@ -13,6 +13,16 @@ export interface BookingBody {
   payload?: JwtPayload;
 }
 
-export interface deletePathParams {
+export interface RescheduleBody {
+  day?: number,
+  year?: number,
+  month?: number,
+  hour?: number,
+  minutes?: number,
+  barberId?: number
+}
+;
+
+export interface DeletePathParams {
   appointmentId: string;
 }
