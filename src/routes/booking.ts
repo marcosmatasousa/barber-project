@@ -12,7 +12,7 @@ import {
 import { validateBookingData } from "../middleware/validateBookingData";
 import { validateUnbookingData } from "../middleware/validateUnbookingData";
 import { validationResult } from "express-validator";
-import { bookingValidador } from "../validators/bookingValidator";
+import { bookingValidator } from "../validators/bookingValidator";
 import { unbookingValidator } from "../validators/unbookingValidator";
 
 const booking = express();
@@ -32,13 +32,13 @@ const validate = (
 
 booking.post(
   "/booking",
-  bookingValidador,
+  bookingValidator,
   validate,
   validateToken,
   validateBookingData,
   async (req: AuthRequest<{}, {}, BookingBody>, res: Response) => {
     const timestamp = convertToTimestamp(req.body);
-    const { clientId, barberId, serviceId } = req.body;
+    const { clientId, barberId, services } = req.body;
 
     try {
       const appointment = await prisma.appointments.create({
@@ -46,11 +46,15 @@ booking.post(
           dateTime: new Date(timestamp),
           clientId: clientId,
           barberId: barberId,
-          serviceId: serviceId,
+          services: {
+            create: services.map((serviceId: number) => ({
+              serviceId: serviceId,
+            })),
+          },
         },
       });
 
-      res.status(201).json(appointment);
+      res.status(201).json({ ...appointment, services: services });
       return;
     } catch (error) {
       console.log(error);
@@ -138,7 +142,7 @@ booking.patch(
         res.status(400).json({ error: "Invalid date" });
         return;
       }
-      
+
       if (barberId) {
         const barberExists = await prisma.users.findUnique({
           where: {

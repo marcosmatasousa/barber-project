@@ -2,7 +2,7 @@ import prisma from "../lib/prisma";
 import { AuthRequest } from "../types/authRequest";
 import { BookingBody } from "../types/booking";
 import { NextFunction, Response } from "express";
-import { isValidDate } from "../utils/utils";
+import { convertToTimestamp, isValidDate } from "../utils/utils";
 
 export async function validateBookingData(
   req: AuthRequest<{}, {}, BookingBody>,
@@ -15,8 +15,21 @@ export async function validateBookingData(
     return;
   }
 
-  const { clientId, barberId, serviceId } = req.body;
+  const { clientId, barberId, services } = req.body;
+
   try {
+    const timestamp = convertToTimestamp(req.body);
+    const isDateUnavailable = await prisma.appointments.findFirst({
+      where: {
+        dateTime: new Date(timestamp),
+      },
+    });
+
+    if (isDateUnavailable) {
+      res.status(400).json({ error: "Date unavailable" });
+      return;
+    }
+
     const clientExists = await prisma.users.findUnique({
       where: {
         id: clientId,
@@ -37,13 +50,21 @@ export async function validateBookingData(
       return;
     }
 
-    const serviceExists = await prisma.services.findUnique({
-      where: {
-        id: serviceId,
-      },
-    });
-    if (!serviceExists) {
-      res.status(400).json({ error: "Service not found" });
+    for (const service of services) {
+      const serviceExists = await prisma.services.findUnique({
+        where: {
+          id: parseInt(service),
+        },
+      });
+      if (!serviceExists) {
+        res.status(400).json({ error: `Service ${service} does not exist` });
+        return;
+      }
+    }
+
+    const checkSet = new Set(services);
+    if (checkSet.size !== services.length) {
+      res.status(400).json({ error: "Repeated service" });
       return;
     }
 

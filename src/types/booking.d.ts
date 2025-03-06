@@ -9,20 +9,18 @@ export interface BookingBody {
   minutes: number;
   barberId: number;
   clientId: number;
-  serviceId: number;
+  services: Array;
   payload?: JwtPayload;
 }
 
 export interface RescheduleBody {
-  day?: number,
-  year?: number,
-  month?: number,
-  hour?: number,
-  minutes?: number,
-  barberId?: number
+  day?: number;
+  year?: number;
+  month?: number;
+  hour?: number;
+  minutes?: number;
+  barberId?: number;
 }
-;
-
 export interface DeletePathParams {
   appointmentId: string;
 }

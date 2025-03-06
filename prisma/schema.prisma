@@ -14,36 +14,40 @@ datasource db {
 }
 
 model Users {
-  id Int @id @default(autoincrement())
-  username String @unique
-  name String
-  password String
+  id                  Int             @id @default(autoincrement())
+  username            String          @unique
+  name                String
+  password            String
   appointmentsAsClient Appointments[] @relation("ClientAppointments")
   appointmentsAsBarber Appointments[] @relation("BarberAppointments")
-  role UserRole @default(client)
+  role                UserRole        @default(client)
 }
 
 model Services {
-  id Int @id @default(autoincrement())
-  name String @unique
-  duration_mins Int
-  price Float
-
-  Appointments Appointments[]
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  duration_mins  Int
+  price          Float
+  appointments   AppointmentsServices[]
 }
 
 model Appointments {
-  id Int @id @default(autoincrement())
-  dateTime DateTime
-  
-  client Users @relation("ClientAppointments", fields: [clientId], references: [id], map: "clientId")
-  clientId Int
-  
-  barber Users @relation("BarberAppointments", fields: [barberId], references: [id], map: "barberId")
-  barberId Int
-  
-  service Services @relation(fields: [serviceId], references: [id])
-  serviceId Int
+  id             Int                      @id @default(autoincrement())
+  dateTime       DateTime
+  client         Users                    @relation("ClientAppointments", fields: [clientId], references: [id], map: "clientId")
+  clientId       Int
+  barber         Users                    @relation("BarberAppointments", fields: [barberId], references: [id], map: "barberId")
+  barberId       Int
+  services       AppointmentsServices[]
+}
+
+model AppointmentsServices {
+  appointmentId Int
+  serviceId     Int
+  appointment   Appointments @relation(fields: [appointmentId], references: [id])
+  service       Services     @relation(fields: [serviceId], references: [id])
+
+  @@id([appointmentId, serviceId])
 }
 
 enum UserRole {

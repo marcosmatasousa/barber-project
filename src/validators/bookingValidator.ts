@@ -8,15 +8,20 @@ const numericFields = [
   "minutes",
   "barberId",
   "clientId",
-  "serviceId",
 ];
 
-export const bookingValidador = checkSchema(
-  numericFields.reduce((schema: Schema, field) => {
-    schema[field] = {
-      isNumeric: true,
-      notEmpty: { errorMessage: `${field} required` },
-    };
-    return schema;
-  }, {})
-);
+const schema = numericFields.reduce((schema: Schema, field) => {
+  schema[field] = {
+    isNumeric: true,
+    notEmpty: { errorMessage: `${field} required` },
+  };
+  return schema;
+}, {});
+
+export const bookingValidator = checkSchema({
+  ...schema,
+  services: {
+    isArray: { options: { min: 1, max: 3 } },
+    notEmpty: { errorMessage: "Service ID required" },
+  },
+});
