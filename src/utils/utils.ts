@@ -1,17 +1,12 @@
 import { BookingBody } from "../types/booking";
 
-export function convertToTimestamp(date: BookingBody): number {
-  const { day, month, year, hour, minutes } = date;
-  return new Date(year, month - 1, day, hour, minutes).getTime();
+export function convertToTimestamp(booking: BookingBody): number {
+  const { date, time } = booking;
+  return new Date(`${date}T${time}:00.000Z`).getTime();
 }
 
-export function isValidDate(year: number, month: number, day: number): boolean {
-  const date = new Date(year, month - 1, day);
+export function isValidDate(dateString: string): boolean {
+  const dateTime = new Date(dateString);
 
-  return (
-    year === date.getFullYear() &&
-    month - 1 === date.getMonth() &&
-    day === date.getDate() &&
-    date > new Date()
-  );
+  return dateTime > new Date();
 }
