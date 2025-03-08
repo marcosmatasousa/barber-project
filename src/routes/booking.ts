@@ -9,10 +9,10 @@ import {
   DeletePathParams,
   RescheduleBody,
 } from "../types/booking";
-import { check, validationResult } from "express-validator";
+import { validationResult } from "express-validator";
 import { bookingValidator } from "../validators/bookingValidator";
 import { unbookingValidator } from "../validators/unbookingValidator";
-import { checkAuthorization } from "../middleware/checkAuthorization";
+import { authorizeAppointmentModification } from "../middleware/authorizeAppointmentModification";
 import { rescheduleValidator } from "../validators/rescheduleValidator";
 
 const booking = express();
@@ -68,7 +68,7 @@ booking.delete(
   validateToken,
   unbookingValidator,
   validate,
-  checkAuthorization,
+  authorizeAppointmentModification,
   async (req: AuthRequest<DeletePathParams>, res: Response) => {
     const { appointmentId } = req.params;
 
@@ -100,7 +100,7 @@ booking.patch(
   validateToken,
   rescheduleValidator,
   validate,
-  checkAuthorization,
+  authorizeAppointmentModification,
   async (
     req: AuthRequest<DeletePathParams, {}, RescheduleBody>,
     res: Response
