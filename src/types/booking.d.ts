@@ -2,11 +2,8 @@ import { Request } from "express";
 import { JwtPayload } from "jsonwebtoken";
 
 export interface BookingBody {
-  day: number;
-  year: number;
-  month: number;
-  hour: number;
-  minutes: number;
+  date: string;
+  time: string;
   barberId: number;
   clientId: number;
   services: Array;
@@ -14,11 +11,8 @@ export interface BookingBody {
 }
 
 export interface RescheduleBody {
-  day?: number;
-  year?: number;
-  month?: number;
-  hour?: number;
-  minutes?: number;
+  date?: string;
+  time?: string;
   barberId?: number;
 }
 export interface DeletePathParams {

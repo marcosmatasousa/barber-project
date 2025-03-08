@@ -9,11 +9,11 @@ import {
   DeletePathParams,
   RescheduleBody,
 } from "../types/booking";
-import { validateBookingData } from "../middleware/validateBookingData";
-import { validateUnbookingData } from "../middleware/validateUnbookingData";
-import { validationResult } from "express-validator";
+import { check, validationResult } from "express-validator";
 import { bookingValidator } from "../validators/bookingValidator";
 import { unbookingValidator } from "../validators/unbookingValidator";
+import { checkAuthorization } from "../middleware/checkAuthorization";
+import { rescheduleValidator } from "../validators/rescheduleValidator";
 
 const booking = express();
 
@@ -32,10 +32,9 @@ const validate = (
 
 booking.post(
   "/booking",
+  validateToken,
   bookingValidator,
   validate,
-  validateToken,
-  validateBookingData,
   async (req: AuthRequest<{}, {}, BookingBody>, res: Response) => {
     const timestamp = convertToTimestamp(req.body);
     const { clientId, barberId, services } = req.body;
@@ -66,14 +65,20 @@ booking.post(
 
 booking.delete(
   "/booking/:appointmentId",
+  validateToken,
   unbookingValidator,
   validate,
-  validateToken,
-  validateUnbookingData,
+  checkAuthorization,
   async (req: AuthRequest<DeletePathParams>, res: Response) => {
     const { appointmentId } = req.params;
 
     try {
+      await prisma.appointmentsServices.deleteMany({
+        where: {
+          appointmentId: parseInt(appointmentId),
+        },
+      });
+
       await prisma.appointments.delete({
         where: {
           id: parseInt(appointmentId),
@@ -93,83 +98,43 @@ booking.delete(
 booking.patch(
   "/booking/:appointmentId/reschedule",
   validateToken,
+  rescheduleValidator,
+  validate,
+  checkAuthorization,
   async (
     req: AuthRequest<DeletePathParams, {}, RescheduleBody>,
     res: Response
   ) => {
     const { appointmentId } = req.params;
-    const { year, day, month, hour, minutes, barberId } = req.body;
-
+    const { date, time, barberId } = req.body;
+    //validator
     try {
       const appointment = await prisma.appointments.findUnique({
         where: { id: parseInt(appointmentId) },
       });
 
-      if (!appointment) {
-        res.status(404).json({ error: "Appointment not found" });
-        return;
-      }
-
-      if (
-        req.payload?.id !== appointment.clientId &&
-        req.payload?.role !== "admin"
-      ) {
-        res.status(401).json({ error: "Unauthorized" });
-        return;
-      }
-
-      let newDateTime = appointment.dateTime;
-      if (year || day || month || hour || minutes) {
-        const originalDateTime = appointment.dateTime;
-        newDateTime = new Date(
-          year ? year : originalDateTime.getFullYear(),
-          day ? day : originalDateTime.getDate(),
-          month ? month : originalDateTime.getMonth(),
-          hour ? hour : originalDateTime.getHours(),
-          minutes ? minutes : originalDateTime.getMinutes(),
-          0,
-          0
-        );
-      }
-
-      if (
-        !isValidDate(
-          newDateTime.getFullYear(),
-          newDateTime.getMonth(),
-          newDateTime.getDate()
-        )
-      ) {
-        res.status(400).json({ error: "Invalid date" });
-        return;
-      }
-
-      if (barberId) {
-        const barberExists = await prisma.users.findUnique({
+      if (appointment) {
+        let newDateTime = appointment.dateTime;
+        if (date || time) {
+          const originalDateTime = appointment.dateTime;
+          newDateTime = new Date(
+            `${date ? date : originalDateTime.toISOString().slice(0, 10)}T${
+              time ? time : originalDateTime.toISOString().slice(11, 16)
+            }:00.000Z`
+          );
+        }
+        const updatedAppointment = await prisma.appointments.update({
           where: {
-            id: barberId,
+            id: parseInt(appointmentId),
+          },
+          data: {
+            dateTime: date || time ? newDateTime : appointment.dateTime,
+            barberId: barberId || appointment.barberId,
           },
         });
-        if (!barberExists || barberExists.role === "client") {
-          res.status(400).json({ error: "Barber not found" });
-          return;
-        }
+        res.status(200).json(updatedAppointment);
+        return;
       }
-
-      const updatedAppointment = await prisma.appointments.update({
-        where: {
-          id: parseInt(appointmentId),
-        },
-        data: {
-          dateTime:
-            day && month && hour && minutes
-              ? newDateTime
-              : appointment.dateTime,
-          barberId: barberId || appointment.barberId,
-        },
-      });
-
-      res.status(200).json(updatedAppointment);
-      return;
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Internal Server Error" });

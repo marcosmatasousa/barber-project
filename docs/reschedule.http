@@ -1,7 +1,7 @@
-PATCH http://localhost:3000/booking/13/reschedule
+PATCH http://localhost:3000/booking/30/reschedule
 content-type: application/json
 authorization: Bearer [place your token here]
 
 {
-    "day": 29,
+    "date": "2025-03-11",
 }

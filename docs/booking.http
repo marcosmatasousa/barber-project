@@ -3,11 +3,8 @@ content-type: application/json
 authorization: Bearer [place your token here]
 
 {
-    "day": 10,
-    "year": 2025,
-    "month": 3,
-    "hour": 16,
-    "minutes": 0,
+    "date": "2025-03-10",
+    "time": "09:00",
     "barberId": 1,
     "clientId": 2,
     "services": [1]

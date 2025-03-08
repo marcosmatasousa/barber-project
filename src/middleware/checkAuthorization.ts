@@ -1,30 +1,22 @@
-import prisma from "../lib/prisma";
-import { AuthRequest } from "../types/authRequest";
 import { NextFunction, Response } from "express";
+import { AuthRequest } from "../types/authRequest";
 import { DeletePathParams } from "../types/booking";
+import prisma from "../lib/prisma";
+import { UserRole } from "@prisma/client";
 
-export async function validateUnbookingData(
+export async function checkAuthorization(
   req: AuthRequest<DeletePathParams>,
   res: Response,
   next: NextFunction
 ) {
   const { appointmentId } = req.params;
-
   try {
     const appointment = await prisma.appointments.findUnique({
-      where: {
-        id: parseInt(appointmentId),
-      },
+      where: { id: parseInt(appointmentId) },
     });
-
-    if (!appointment) {
-      res.status(400).json({ error: "Bad request, invalid appointment ID" });
-      return;
-    }
-
     if (
       req.payload?.id !== appointment?.clientId &&
-      req.payload?.role !== "admin"
+      req.payload?.role !== UserRole.admin
     ) {
       res.status(401).json({ error: "Unauthorized" });
       return;
@@ -32,7 +24,6 @@ export async function validateUnbookingData(
     next();
   } catch (error) {
     console.log(error);
-    res.sendStatus(500);
-    return;
+    res.status(500).json({ error: "Internal Server Error" });
   }
 }
