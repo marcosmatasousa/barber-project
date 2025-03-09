@@ -20,6 +20,7 @@ model Users {
   password            String
   appointmentsAsClient Appointments[] @relation("ClientAppointments")
   appointmentsAsBarber Appointments[] @relation("BarberAppointments")
+  availability BarberAvailability[]
   role                UserRole        @default(client)
 }
 
@@ -39,6 +40,15 @@ model Appointments {
   barber         Users                    @relation("BarberAppointments", fields: [barberId], references: [id], map: "barberId")
   barberId       Int
   services       AppointmentsServices[]
+}
+
+model BarberAvailability {
+  barberId Int
+  date DateTime
+  startTime String
+  endTime String
+  barber Users @relation(fields: [barberId], references: [id])
+  @@id([barberId, date])
 }
 
 model AppointmentsServices {

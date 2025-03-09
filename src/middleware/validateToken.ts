@@ -11,12 +11,16 @@ export function validateToken(
   const token = req.headers.authorization?.split(" ")[1];
 
   if (!token) {
-    res.sendStatus(401);
+    res.status(401).json({ error: "Unauthorized" });
     return;
   }
 
   try {
     const payload = verify(token) as JwtPayload;
+    if (!payload) {
+      res.status(401).json({ error: "Unauthorized" });
+      return;
+    }
     req.payload = payload;
     next();
   } catch (error) {

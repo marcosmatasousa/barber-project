@@ -4,7 +4,7 @@ import { DeletePathParams } from "../types/booking";
 import prisma from "../lib/prisma";
 import { UserRole } from "@prisma/client";
 
-export async function checkAuthorization(
+export async function authorizeAppointmentModification(
   req: AuthRequest<DeletePathParams>,
   res: Response,
   next: NextFunction
