@@ -39,14 +39,14 @@ agenda.post(
       const formattedDates = availabilityDates.map(
         (dateObj: availabilityDate) => ({
           barberId: req.payload?.id,
-          date: new Date(dateObj.date),
-          startTime: dateObj.startTime,
-          endTime: dateObj.endTime,
+          startTime: new Date(`${dateObj.date}T${dateObj.startTime}:00.000Z`),
+          endTime: new Date(`${dateObj.date}T${dateObj.endTime}:00.000Z`),
         })
       );
+      console.log(formattedDates);
 
       const createdAvailability =
-        await prisma.barberAvailability.createManyAndReturn({
+        await prisma.barberAvailability.createMany({
           data: formattedDates,
         });
 

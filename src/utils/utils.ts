@@ -1,7 +1,6 @@
 import { BookingBody } from "../types/booking";
 
-export function convertToTimestamp(booking: BookingBody): number {
-  const { date, time } = booking;
+export function convertToTimestamp(date: string, time: string): number {
   return new Date(`${date}T${time}:00.000Z`).getTime();
 }
 

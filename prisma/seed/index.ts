@@ -1,5 +1,5 @@
-import prisma from "../../lib/prisma";
-import { hash } from "../../lib/argon2";
+import prisma from "../../src/lib/prisma";
+import { hash } from "../../src/lib/argon2";
 
 async function main() {
   try {

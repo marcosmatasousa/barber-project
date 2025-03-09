@@ -23,16 +23,35 @@ export const barberAvailabilityValidator = checkSchema({
             );
           }
 
-          const result = await prisma.barberAvailability.findFirst({
-            where: {
-              barberId: req.payload?.id,
-              date: new Date(date.date),
-            },
-          });
+          const newStartTime = new Date(
+            `${date.date}T${date.startTime}:00.000Z`
+          );
+          const newEndTime = new Date(`${date.date}T${date.endTime}:00.000Z`);
 
-          if (result) {
+          const overlappingDateExists =
+            await prisma.barberAvailability.findFirst({
+              where: {
+                barberId: req.payload?.id,
+                OR: [
+                  {
+                    startTime: { lt: newStartTime },
+                    endTime: { gt: newStartTime },
+                  },
+                  {
+                    startTime: { lt: newEndTime },
+                    endTime: { gt: newEndTime },
+                  },
+                  {
+                    startTime: { gte: newStartTime },
+                    endTime: { lte: newEndTime },
+                  },
+                ],
+              },
+            });
+
+          if (overlappingDateExists) {
             throw new Error(
-              `You have already set availability for ${date.date}. To alter startTime or endTime, access the appropriate path`
+              `${date.date}, ${date.time} is an overlapping date.`
             );
           }
         }

@@ -14,14 +14,11 @@ import { bookingValidator } from "../validators/bookingValidator";
 import { unbookingValidator } from "../validators/unbookingValidator";
 import { authorizeAppointmentModification } from "../middleware/authorizeAppointmentModification";
 import { rescheduleValidator } from "../validators/rescheduleValidator";
+import { checkBarberAvailability } from "../middleware/checkBarberAvailability";
 
 const booking = express();
 
-const validate = (
-  req: AuthRequest<{}, {}, BookingBody>,
-  res: Response,
-  next: NextFunction
-) => {
+const validate = (req: AuthRequest, res: Response, next: NextFunction) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     res.status(400).json({ errors: errors.array() });
@@ -35,9 +32,10 @@ booking.post(
   validateToken,
   bookingValidator,
   validate,
+  checkBarberAvailability,
   async (req: AuthRequest<{}, {}, BookingBody>, res: Response) => {
-    const timestamp = convertToTimestamp(req.body);
-    const { clientId, barberId, services } = req.body;
+    const { date, time, clientId, barberId, services } = req.body;
+    const timestamp = convertToTimestamp(date, time);
 
     try {
       const appointment = await prisma.appointments.create({
@@ -107,7 +105,7 @@ booking.patch(
   ) => {
     const { appointmentId } = req.params;
     const { date, time, barberId } = req.body;
-    //validator
+
     try {
       const appointment = await prisma.appointments.findUnique({
         where: { id: parseInt(appointmentId) },

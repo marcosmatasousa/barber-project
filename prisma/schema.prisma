@@ -44,11 +44,10 @@ model Appointments {
 
 model BarberAvailability {
   barberId Int
-  date DateTime
-  startTime String
-  endTime String
+  startTime DateTime
+  endTime DateTime
   barber Users @relation(fields: [barberId], references: [id])
-  @@id([barberId, date])
+  @@id([barberId, startTime, endTime])
 }
 
 model AppointmentsServices {
