@@ -1,4 +1,4 @@
-import { checkSchema, Schema } from "express-validator";
+import { checkSchema } from "express-validator";
 import prisma from "../lib/prisma";
 import { UserRole } from "@prisma/client";
 import { isValidDate } from "../utils/utils";
