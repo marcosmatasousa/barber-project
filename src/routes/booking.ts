@@ -1,6 +1,6 @@
 import express, { NextFunction } from "express";
 import { Response } from "express";
-import { convertToTimestamp, isValidDate } from "../utils/utils";
+import { convertToTimestamp } from "../utils/utils";
 import prisma from "../lib/prisma";
 import { validateToken } from "../middleware/validateToken";
 import { AuthRequest } from "../types/authRequest";
@@ -14,7 +14,9 @@ import { bookingValidator } from "../validators/bookingValidator";
 import { unbookingValidator } from "../validators/unbookingValidator";
 import { authorizeAppointmentModification } from "../middleware/authorizeAppointmentModification";
 import { rescheduleValidator } from "../validators/rescheduleValidator";
-import { checkBarberAvailability } from "../middleware/checkBarberAvailability";
+import { checkBarberAvailabilityForBooking } from "../middleware/checkBarberAvailabilityForBooking";
+import { checkBarberAvailabilityForReschedule } from "../middleware/checkBarberAvailabilityForReschedule";
+import { checkAuthorizationForBooking } from "../middleware/checkAuthorizationForBooking";
 
 const booking = express();
 
@@ -32,7 +34,8 @@ booking.post(
   validateToken,
   bookingValidator,
   validate,
-  checkBarberAvailability,
+  checkAuthorizationForBooking,
+  checkBarberAvailabilityForBooking,
   async (req: AuthRequest<{}, {}, BookingBody>, res: Response) => {
     const { date, time, clientId, barberId, services } = req.body;
     const timestamp = convertToTimestamp(date, time);
@@ -99,6 +102,7 @@ booking.patch(
   rescheduleValidator,
   validate,
   authorizeAppointmentModification,
+  checkBarberAvailabilityForReschedule,
   async (
     req: AuthRequest<DeletePathParams, {}, RescheduleBody>,
     res: Response
@@ -111,28 +115,26 @@ booking.patch(
         where: { id: parseInt(appointmentId) },
       });
 
-      if (appointment) {
-        let newDateTime = appointment.dateTime;
-        if (date || time) {
-          const originalDateTime = appointment.dateTime;
-          newDateTime = new Date(
-            `${date ? date : originalDateTime.toISOString().slice(0, 10)}T${
-              time ? time : originalDateTime.toISOString().slice(11, 16)
-            }:00.000Z`
-          );
-        }
-        const updatedAppointment = await prisma.appointments.update({
-          where: {
-            id: parseInt(appointmentId),
-          },
-          data: {
-            dateTime: date || time ? newDateTime : appointment.dateTime,
-            barberId: barberId || appointment.barberId,
-          },
-        });
-        res.status(200).json(updatedAppointment);
-        return;
+      let newDateTime = appointment?.dateTime;
+      if (date || time) {
+        const originalDateTime = appointment?.dateTime;
+        newDateTime = new Date(
+          `${date ? date : originalDateTime?.toISOString().slice(0, 10)}T${
+            time ? time : originalDateTime?.toISOString().slice(11, 16)
+          }:00.000Z`
+        );
       }
+      const updatedAppointment = await prisma.appointments.update({
+        where: {
+          id: parseInt(appointmentId),
+        },
+        data: {
+          dateTime: date || time ? newDateTime : appointment?.dateTime,
+          barberId: barberId || appointment?.barberId,
+        },
+      });
+      res.status(200).json(updatedAppointment);
+      return;
     } catch (error) {
       console.log(error);
       res.status(500).json({ error: "Internal Server Error" });

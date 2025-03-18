@@ -51,11 +51,22 @@ export const barberAvailabilityValidator = checkSchema({
 
           if (overlappingDateExists) {
             throw new Error(
-              `${date.date}, ${date.time} is an overlapping date.`
+              `${date.date}, ${date.startTime} - ${date.endTime} is an overlapping date.`
             );
           }
         }
 
+        const datesCount: { [date: string]: number } = {};
+        for (const obj of availabilityDates) {
+          if (datesCount[obj.date]) {
+            datesCount[obj.date] += 1;
+            if (datesCount[obj.date] > 1) {
+              throw new Error(`Repeated date: ${obj.date}`);
+            }
+          } else {
+            datesCount[obj.date] = 1;
+          }
+        }
         return true;
       },
     },
