@@ -1,4 +1,5 @@
 import { checkSchema } from "express-validator";
+import prisma from "../lib/prisma";
 
 export const SignUpValidator = checkSchema({
   username: {
@@ -7,6 +8,19 @@ export const SignUpValidator = checkSchema({
     isLength: {
       options: { min: 5, max: 20 },
       errorMessage: "Username must be between 5 and 20 characters",
+    },
+    custom: {
+      options: async (username) => {
+        const usernameAlreadyExists = await prisma.users.findFirst({
+          where: {
+            username: username,
+          },
+        });
+        if (usernameAlreadyExists) {
+          throw new Error("username already exists");
+        }
+        return true;
+      },
     },
   },
   name: {

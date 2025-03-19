@@ -38,7 +38,7 @@ signup.post(
           password: hashedPassword,
         },
       });
-      res.status(200).json({ message: `User created with id ${newUser.id}` });
+      res.status(201).json({ name: name, username: username, id: newUser.id });
       return;
     } catch (error) {
       console.log(error);
