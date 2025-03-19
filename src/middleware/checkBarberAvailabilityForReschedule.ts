@@ -33,10 +33,15 @@ export async function checkBarberAvailabilityForReschedule(
       },
     });
 
+    const dateResult = date ? date : newDateTime?.toISOString().split("T")[0];
+    const timeResult = time
+      ? time
+      : newDateTime?.toISOString().split("T")[1].substring(0, 5);
+
     if (!isBarberWorking) {
-      res
-        .status(400)
-        .json({ error: `Barber not available for ${date}, ${time}` });
+      res.status(400).json({
+        error: `Barber not available for ${dateResult}, ${timeResult}`,
+      });
       return;
     }
     next();
