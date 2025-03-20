@@ -10,6 +10,7 @@ import { validateToken } from "../middleware/validateToken";
 import prisma from "../lib/prisma";
 import { barberAvailabilityValidator } from "../validators/barberAvailabilityValidator";
 import { authorizeToOpenAgenda } from "../middleware/authorizeToOpenAgenda";
+import { UserRole } from "@prisma/client";
 
 const agenda = express();
 
@@ -24,6 +25,34 @@ const validate = (
     return;
   }
   next();
+};
+
+const checkRole = async (
+  req: AuthRequest<{ barberId: string }>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { barberId } = req.params;
+  try {
+    const isBarber = await prisma.users.findFirst({
+      where: {
+        id: parseInt(barberId),
+        OR: [{ role: "admin" }, { role: "barber" }],
+      },
+    });
+    console.log(isBarber);
+
+    if (!isBarber) {
+      res
+        .status(400)
+        .json({ error: `User with ID ${barberId} is not a barber` });
+      return;
+    }
+    next();
+  } catch (error) {
+    console.log(error);
+    res.sendStatus(500);
+  }
 };
 
 agenda.post(
@@ -60,12 +89,16 @@ agenda.post(
 
 agenda.get(
   "/agenda/:barberId",
+  checkRole,
   async (req: AuthRequest<{ barberId: string }>, res: Response) => {
     const { barberId } = req.params;
 
     const availability = await prisma.barberAvailability.findMany({
       where: {
         barberId: parseInt(barberId),
+        barber: {
+          OR: [{ role: "admin" }, { role: "barber" }],
+        },
       },
       orderBy: { startTime: "asc" },
     });

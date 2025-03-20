@@ -62,4 +62,5 @@ model AppointmentsServices {
 enum UserRole {
   client
   admin
+  barber
 }
