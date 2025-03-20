@@ -4,6 +4,6 @@ interface availabilityDate {
   endTime: string;
 }
 
-export interface availabilityRequestBody {
+export interface agendaRequestBody {
   availabilityDates: availabilityDate[];
 }
