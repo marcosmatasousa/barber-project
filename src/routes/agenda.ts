@@ -40,7 +40,6 @@ const checkRole = async (
         OR: [{ role: "admin" }, { role: "barber" }],
       },
     });
-    console.log(isBarber);
 
     if (!isBarber) {
       res

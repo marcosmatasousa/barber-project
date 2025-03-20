@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string"
+    },
+    "barberId": {
+      "type": "number"
+    },
+    "clientId": { "type": "number" },
+    "services": {
+      "type": "array",
+      "items": {
+        "type": "number"
+      }
+    }
+  },
+  "required": ["date", "time", "barberId", "clientId", "services"]
+}

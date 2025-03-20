@@ -1,0 +1,21 @@
+{
+  "type": "object",
+  "properties": {
+    "type": "object",
+    "properties": {
+      "availability": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      },
+      "booked": {
+        "type": "array",
+        "items": {
+          "type": "string"
+        }
+      }
+    },
+    "required": ["availability", "booked"]
+  }
+}
