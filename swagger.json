@@ -1,0 +1,466 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Barber API",
+    "version": "1.0.0"
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    },
+    "schemas": {
+      "authRequest": {
+        "type": "object",
+        "properties": {
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["username", "password"]
+      },
+      "authResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": ["token"]
+      },
+      "signupRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "password": {
+            "type": "string",
+            "format": "password"
+          }
+        },
+        "required": ["name", "username", "password"]
+      },
+      "signupResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "bookingRequest": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "barberId": {
+            "type": "number"
+          },
+          "clientId": { "type": "number" },
+          "services": {
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": ["date", "time", "barberId", "clientId", "services"]
+      },
+      "rescheduleRequest": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string"
+          },
+          "time": {
+            "type": "string"
+          },
+          "barberId": {
+            "type": "integer"
+          }
+        }
+      },
+      "agendaRequest": {
+        "type": "object",
+        "properties": {
+          "availabilityDates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "date": {
+                  "type": "string"
+                },
+                "startTime": {
+                  "type": "string"
+                },
+                "endTime": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "agendaResponse": {
+        "type": "object",
+        "properties": {
+          "type": "object",
+          "properties": {
+            "availability": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "booked": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "required": ["availability", "booked"]
+        }
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Authentication",
+      "description": "Authenticate users"
+    },
+    {
+      "name": "Sign Up",
+      "description": "Create user"
+    },
+    {
+      "name": "Booking",
+      "description": "Book, delete or reschedule an appointment"
+    },
+    {
+      "name": "Health",
+      "description": "Health check"
+    }
+  ],
+  "paths": {
+    "/auth": {
+      "post": {
+        "summary": "Authenticate users",
+        "tags": ["Authentication"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/authRequest"
+              },
+              "example": {
+                "username": "your_username",
+                "password": "your_password"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successfully authenticated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/authResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/signup": {
+      "post": {
+        "summary": "Register clients to the system",
+        "tags": ["Sign Up"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/signupRequest"
+              },
+              "example": {
+                "name": "Name",
+                "username": "username",
+                "password": "password"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User successfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/signupResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Username already exists"
+          }
+        }
+      }
+    },
+    "/booking": {
+      "post": {
+        "summary": "Book appointments with a barber",
+        "tags": ["Booking"],
+        "security": [{ "bearerAuth": [] }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/bookingRequest"
+              },
+              "example": {
+                "date": "2025-12-25",
+                "time": "09:00",
+                "barberId": 1,
+                "clientId": 2,
+                "services": [1, 2]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Appointment succesfully created",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/bookingRequest"
+                },
+                "example": {
+                  "date": "2025-12-25",
+                  "time": "09:00",
+                  "barberId": 1,
+                  "clientId": 2,
+                  "services": [1, 2]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/booking/{appointmentId}": {
+      "delete": {
+        "summary": "Delete an appointment",
+        "tags": ["Booking"],
+        "security": [{ "bearerAuth": [] }],
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the appointment to be canceled"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Appointment succesfully canceled"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/booking/{appointmentId}/reschedule": {
+      "patch": {
+        "summary": "Reschedule an existing appointment",
+        "security": [{ "bearerAuth": [] }],
+        "tags": ["Booking"],
+        "parameters": [
+          {
+            "name": "appointmentId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the appointment to be rescheduled"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/rescheduleRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Appointment succesfully rescheduled"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": { "description": "Unauthorized" },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/agenda": {
+      "post": {
+        "summary": "A route for barbers to open agenda",
+        "security": [{ "bearerAuth": [] }],
+        "tags": ["Agenda"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/agendaRequest"
+              },
+              "example": {
+                "availabilityDates": [
+                  {
+                    "date": "2025-03-20",
+                    "startTime": "09:00",
+                    "endTime": "19:00"
+                  },
+                  {
+                    "date": "2025-03-21",
+                    "startTime": "09:00",
+                    "endTime": "19:00"
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Agenda opened successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/agendaRequest"
+                }
+              }
+            }
+          },
+          "400": { "description": "Bad request" },
+          "401": { "description": "Unauthorized" },
+          "500": { "description": "Internal Server Error" }
+        }
+      }
+    },
+    "/agenda/{barberId}": {
+      "get": {
+        "summary": "Get the agenda of a barber with the given ID",
+        "tags": ["Agenda"],
+        "parameters": [
+          {
+            "name": "barberId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "ID of the barber"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "summary": "Health check of the API",
+        "tags": ["Health"],
+        "security": [{ "bearerAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Success message",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Everything's OK. You are an user of this system"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    }
+  }
+}

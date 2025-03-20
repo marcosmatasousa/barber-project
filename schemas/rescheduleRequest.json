@@ -1,0 +1,14 @@
+{
+  "type": "object",
+  "properties": {
+    "date": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string"
+    },
+    "barberId": {
+      "type": "integer"
+    }
+  }
+}
