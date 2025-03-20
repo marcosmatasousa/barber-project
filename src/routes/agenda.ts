@@ -1,8 +1,8 @@
 import express, { NextFunction } from "express";
-import { Request, Response } from "express";
+import { Response } from "express";
 import {
+  agendaRequestBody,
   availabilityDate,
-  availabilityRequestBody,
 } from "../types/availabilityRequest";
 import { AuthRequest } from "../types/authRequest";
 import { validationResult } from "express-validator";
@@ -14,7 +14,7 @@ import { authorizeToOpenAgenda } from "../middleware/authorizeToOpenAgenda";
 const agenda = express();
 
 const validate = (
-  req: AuthRequest<{}, {}, availabilityRequestBody>,
+  req: AuthRequest<{}, {}, agendaRequestBody>,
   res: Response,
   next: NextFunction
 ) => {
@@ -32,7 +32,7 @@ agenda.post(
   authorizeToOpenAgenda,
   barberAvailabilityValidator,
   validate,
-  async (req: AuthRequest<{}, {}, availabilityRequestBody>, res: Response) => {
+  async (req: AuthRequest<{}, {}, agendaRequestBody>, res: Response) => {
     const { availabilityDates } = req.body;
 
     try {
