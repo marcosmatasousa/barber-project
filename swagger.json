@@ -435,6 +435,20 @@
         }
       }
     },
+    "/barbers": {
+      "get": {
+        "summary": "Retrieve the list of all barbers",
+        "tags": ["Barbers"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health check of the API",
