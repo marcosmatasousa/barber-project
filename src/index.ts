@@ -5,6 +5,7 @@ import healthcheck from "./routes/healthcheck";
 import booking from "./routes/booking";
 import agenda from "./routes/agenda";
 import barbers from "./routes/barbers";
+import services from "./routes/services";
 import swaggerUI from "swagger-ui-express";
 import swaggerDocument from "../swagger.json";
 
@@ -16,6 +17,7 @@ app.use(healthcheck);
 app.use(booking);
 app.use(agenda);
 app.use(barbers);
+app.use(services);
 app.use("/api-docs", swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 const PORT = process.env.PORT || 3000;
 

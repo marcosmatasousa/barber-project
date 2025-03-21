@@ -449,6 +449,20 @@
         }
       }
     },
+    "/services": {
+      "get": {
+        "summary": "Retrieve the list of all services",
+        "tags": ["Services"],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
     "/health": {
       "get": {
         "summary": "Health check of the API",
