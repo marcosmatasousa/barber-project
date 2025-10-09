@@ -8,7 +8,3 @@
 - **Prisma ORM**
 - **SQL Database**
 
-## API Documentation
-For more details, visit the API documentation:
-[Barber Project API Docs](https://barber-project-production.up.railway.app/api-docs/)
-
